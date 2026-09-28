@@ -1,0 +1,365 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   MoSPI AirIndex Platform — Official Statistical Portal
+   Ministry of Statistics and Programme Implementation, Government of India
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. DESIGN TOKENS ──────────────────────────────────────────────────────── */
+:root {
+  /* Official palette */
+  --gov-navy:       #0c2340; /* Primary brand text and headers */
+  --gov-navy-dark:  #08172b;
+  --gov-blue:       #0284c7; /* Primary action / link color */
+  --gov-blue-hover: #0369a1;
+  --gov-saffron:    #d97706; /* MoSPI saffron accent (sparingly used) */
+  --gov-green:      #16a34a; /* Price decrease (positive indicator) */
+  --gov-red:        #dc2626; /* Price increase (inflation indicator) */
+
+  /* Neutral tones */
+  --bg-page:        #f8fafc; /* Plain flat light background */
+  --bg-surface:     #ffffff; /* Plain flat card / table background */
+  --bg-surface-sub: #f1f5f9; /* Table header, secondary block */
+  --border-light:   #e2e8f0; /* Crisp 1px solid border */
+  --border-dark:    #cbd5e1;
+
+  /* Typography */
+  --text-primary:   #0c2340;
+  --text-secondary: #334155;
+  --text-muted:     #64748b;
+
+  /* Form & Component radii: 4px to 6px */
+  --radius-sm:      4px;
+  --radius-md:      6px;
+
+  /* Font */
+  --font-sans:      'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:      'JetBrains Mono', monospace;
+}
+
+.dark {
+  --gov-navy:       #f1f5f9;
+  --gov-navy-dark:  #e2e8f0;
+  --gov-blue:       #38bdf8;
+  --gov-blue-hover: #7dd3fc;
+  --gov-saffron:    #f59e0b;
+  --gov-green:      #22c55e;
+  --gov-red:        #ef4444;
+
+  --bg-page:        #0f172a;
+  --bg-surface:     #1e293b;
+  --bg-surface-sub: #172336;
+  --border-light:   #334155;
+  --border-dark:    #475569;
+
+  --text-primary:   #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted:     #94a3b8;
+}
+
+/* ── 2. BASE STYLES ────────────────────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  font-feature-settings: "tnum" 1;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum" 1;
+}
+
+/* Clean accessible scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-surface-sub);
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: var(--radius-sm);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ── 3. FLAT SURFACES & CARDS (NO BLUR, NO GLOW) ──────────────────────────── */
+.glass-panel,
+.bg-white {
+  background-color: var(--bg-surface) !important;
+  border: 1px solid var(--border-light) !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.dark .dark\:bg-slate-900,
+.dark .dark\:bg-slate-800 {
+  background-color: var(--bg-surface) !important;
+  border: 1px solid var(--border-light) !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.20) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.bg-slate-50  { background-color: var(--bg-surface-sub) !important; }
+.bg-slate-100 { background-color: var(--bg-surface-sub) !important; }
+.dark .dark\:bg-slate-800\/40,
+.dark .dark\:bg-slate-800\/60 { background-color: var(--bg-surface-sub) !important; }
+
+/* Borders */
+.border-slate-100,
+.border-slate-200,
+.border-slate-300,
+.border-sky-200 {
+  border-color: var(--border-light) !important;
+}
+.dark .dark\:border-slate-700,
+.dark .dark\:border-slate-800,
+.dark .dark\:border-sky-500\/20,
+.dark .dark\:border-sky-500\/30 {
+  border-color: var(--border-light) !important;
+}
+
+/* ── 4. FLAT BUTTONS (SOLID, 4px-6px RADIUS, NO GRADIENT, NO HOVER LIFT) ─── */
+.btn-primary,
+.btn-sky-primary,
+.bg-sky-500,
+.bg-sky-600 {
+  background: var(--gov-blue) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--gov-blue) !important;
+  border-radius: var(--radius-sm) !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: background-color 150ms ease, border-color 150ms ease !important;
+}
+.btn-primary:hover,
+.btn-sky-primary:hover,
+.bg-sky-500:hover,
+.bg-sky-600:hover {
+  background: var(--gov-blue-hover) !important;
+  border-color: var(--gov-blue-hover) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-secondary {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-dark) !important;
+  border-radius: var(--radius-sm) !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: background-color 150ms ease, border-color 150ms ease !important;
+}
+.btn-secondary:hover {
+  background: var(--bg-surface-sub) !important;
+  border-color: var(--gov-blue) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-saffron {
+  background: var(--gov-saffron) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--gov-saffron) !important;
+  border-radius: var(--radius-sm) !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: background-color 150ms ease !important;
+}
+.btn-saffron:hover {
+  background: #b45309 !important;
+  border-color: #b45309 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ── 5. FORM INPUTS & SELECTS ──────────────────────────────────────────────── */
+input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  background-color: var(--bg-surface) !important;
+  border: 1px solid var(--border-dark) !important;
+  color: var(--text-primary) !important;
+  border-radius: var(--radius-sm) !important;
+  padding: 0.4rem 0.65rem !important;
+  font-size: 0.8125rem !important;
+  transition: border-color 150ms ease !important;
+}
+input:not([type="range"]):not([type="checkbox"]):focus,
+select:focus,
+textarea:focus {
+  border-color: var(--gov-blue) !important;
+  box-shadow: 0 0 0 1px var(--gov-blue) !important;
+  outline: none !important;
+}
+input[type="range"] {
+  accent-color: var(--gov-blue);
+}
+
+/* ── 6. STATISTICAL DATA TABLES (CLEAN GOVERNMENT FORMAT) ─────────────────── */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.8125rem;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--bg-surface-sub) !important;
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid var(--border-dark) !important;
+  border-top: 1px solid var(--border-light) !important;
+  padding: 0.5rem 0.75rem !important;
+  text-align: left;
+}
+
+tbody td {
+  padding: 0.5rem 0.75rem !important;
+  border-bottom: 1px solid var(--border-light) !important;
+}
+
+tbody tr:nth-child(even) {
+  background-color: var(--bg-surface-sub) !important;
+}
+
+tbody tr:hover {
+  background-color: rgba(2, 132, 199, 0.05) !important;
+}
+.dark tbody tr:hover {
+  background-color: rgba(56, 189, 248, 0.08) !important;
+}
+
+/* ── 7. ACCESSIBLE BADGES & TAGS (FLAT, 4px RADIUS) ────────────────────────── */
+.badge-tag,
+.badge-sky {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--bg-surface-sub) !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border-light) !important;
+  border-radius: var(--radius-sm) !important;
+  padding: 0.15rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em;
+}
+
+.tag-positive {
+  background-color: rgba(22, 163, 74, 0.10) !important;
+  color: var(--gov-green) !important;
+  border: 1px solid rgba(22, 163, 74, 0.25) !important;
+  border-radius: var(--radius-sm) !important;
+  padding: 0.15rem 0.45rem !important;
+  font-weight: 600 !important;
+  font-family: var(--font-mono);
+}
+
+.tag-negative {
+  background-color: rgba(220, 38, 38, 0.10) !important;
+  color: var(--gov-red) !important;
+  border: 1px solid rgba(220, 38, 38, 0.25) !important;
+  border-radius: var(--radius-sm) !important;
+  padding: 0.15rem 0.45rem !important;
+  font-weight: 600 !important;
+  font-family: var(--font-mono);
+}
+
+/* ── 8. SCROLL PROGRESS BAR (FLAT 2PX SOLID LINE, NO GRADIENT) ─────────────── */
+.scroll-progress-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: transparent;
+  z-index: 100;
+  pointer-events: none;
+}
+.scroll-progress-bar {
+  height: 100%;
+  background-color: var(--gov-blue) !important;
+  box-shadow: none !important;
+  transition: width 0.1s linear;
+}
+
+/* ── 9. GOVERNMENT FOOTER ─────────────────────────────────────────────────── */
+footer {
+  background-color: var(--gov-navy) !important;
+  border-top: 1px solid var(--border-dark) !important;
+  color: #94a3b8 !important;
+  border-radius: 0 !important;
+}
+footer a, footer button {
+  color: #cbd5e1 !important;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 150ms ease;
+}
+footer a:hover, footer button:hover {
+  color: #ffffff !important;
+}
+
+/* ── 10. MODALS ───────────────────────────────────────────────────────────── */
+.modal-card {
+  background-color: var(--bg-surface) !important;
+  border: 1px solid var(--border-dark) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ── 11. MAP POPUPS ───────────────────────────────────────────────────────── */
+.leaflet-popup-content-wrapper {
+  border-radius: var(--radius-sm) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  background-color: var(--bg-surface) !important;
+  border: 1px solid var(--border-light) !important;
+  color: var(--text-primary) !important;
+}
+.dark .leaflet-popup-content-wrapper {
+  background-color: var(--bg-surface) !important;
+  color: #f8fafc !important;
+  border: 1px solid var(--border-light) !important;
+}
+.dark .leaflet-popup-tip {
+  background-color: var(--bg-surface) !important;
+}
+
+/* ── 12. PRINT OPTIMIZATION ───────────────────────────────────────────────── */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+  header, footer, .no-print, .cookie-banner, .scroll-progress-container {
+    display: none !important;
+  }
+}
+
+/* ── 13. PREFERS-REDUCED-MOTION ───────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
