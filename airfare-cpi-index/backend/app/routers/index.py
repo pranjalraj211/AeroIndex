@@ -1,11 +1,16 @@
 from typing import Optional, List, Dict, Any
+from datetime import datetime
 from pydantic import BaseModel
 from backend.app.services.mock_data import (
     generate_historical_365d_data,
     generate_multiyear_time_series,
     YEARLY_MACRO_METRICS
 )
-
+from backend.app.services.config import (
+    N_ROUTES_MONITORED,
+    N_SOURCES,
+    AVG_DEPARTURE_WINDOWS_SCRAPED_PER_DAY
+)
 
 def get_advance_booking_curve() -> List[Dict[str, Any]]:
     return [
@@ -72,12 +77,23 @@ def get_index_data(
     current_pt = full_3y[-1]
     prev_week_pt = full_3y[-8]
     prev_month_pt = full_3y[-31]
+    prev_year_pt = full_3y[-366] if len(full_3y) > 366 else full_3y[0]
     
     headline_val = current_pt["headline_index"]
     dod_pct = current_pt["dod_change_pct"]
     wow_pct = round(((headline_val - prev_week_pt["headline_index"]) / prev_week_pt["headline_index"]) * 100, 2)
     mom_pct = round(((headline_val - prev_month_pt["headline_index"]) / prev_month_pt["headline_index"]) * 100, 2)
-    yoy_pct = 12.80
+    def trailing_7d_avg(series, end_offset):
+        """Average of the 7 days ending `end_offset` days before the most recent point.
+        end_offset=0 means the most recent 7 days; end_offset=365 means the same
+        7-day window one year earlier. Averaging cancels out weekday swings."""
+        end_idx = len(series) - end_offset
+        window = series[max(0, end_idx - 7):end_idx]
+        return sum(p["headline_index"] for p in window) / len(window)
+
+    curr_7d_avg = trailing_7d_avg(full_3y, 0)
+    year_ago_7d_avg = trailing_7d_avg(full_3y, 365) if len(full_3y) > 372 else curr_7d_avg
+    yoy_pct = round(((curr_7d_avg - year_ago_7d_avg) / year_ago_7d_avg) * 100, 2) 
     
     return {
         "status": "success",
@@ -87,9 +103,9 @@ def get_index_data(
         "mom_change_pct": mom_pct,
         "yoy_change_pct": yoy_pct,
         "base_period": "2024=100 (DGCA Passenger Volume Weighted)",
-        "total_routes_monitored": 32,
-        "total_fares_today": 695700,
-        "last_updated": "2026-09-28T14:24:00+05:30",
+        "total_routes_monitored": N_ROUTES_MONITORED,
+        "total_fares_today": N_ROUTES_MONITORED * N_SOURCES * AVG_DEPARTURE_WINDOWS_SCRAPED_PER_DAY,
+        "last_updated": datetime.now().isoformat(),
         "time_series_3y": full_3y,
         "time_series_365d": full_3y[-365:],
         "time_series_filtered": filtered_series,

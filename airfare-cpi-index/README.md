@@ -9,11 +9,11 @@
 
 ## 📌 Executive Summary
 
-India's headline Consumer Price Index (CPI-Combined, Base 2012=100) currently collects domestic airfare quotes manually once a month from a handful of physical airline reservation counters. Over the past decade, Indian domestic civil aviation passenger volume has quadrupled (>150 million annual passengers), rendering the legacy survey methodology prone to **time-lag bias (15–45 days)**, **sampling under-coverage**, and an inability to track **dynamic pricing surges**, **weekend premiums**, and **advance-purchase price escalation**.
+India's headline Consumer Price Index (CPI-Combined, Base 2024=100) currently collects domestic airfare quotes manually once a month from a handful of physical airline reservation counters. Over the past decade, Indian domestic civil aviation passenger volume has quadrupled (>150 million annual passengers), rendering the legacy survey methodology prone to **time-lag bias (15–45 days)**, **sampling under-coverage**, and an inability to track **dynamic pricing surges**, **weekend premiums**, and **advance-purchase price escalation**.
 
 This project provides a **production-grade, high-frequency Automated Airfare Price Index (AirIndex)** system that:
-1. Automatically crawls **4 direct airlines** (IndiGo, Air India Group, Akasa Air, SpiceJet) and **5 major OTAs** (MakeMyTrip, EaseMyTrip, Cleartrip, Ixigo, Google Flights) across 16 major DGCA city-pairs.
-2. Ingests over **340,000 daily fare quotations** across the entire advance booking horizon (0–3d, 4–7d, 8–14d, 15–30d, 30+d).
+1. Automatically crawls **4 direct airlines** (IndiGo, Air India Group, Akasa Air, SpiceJet) and **4 major OTAs** (MakeMyTrip, EaseMyTrip, Cleartrip, Ixigo) across 16 major DGCA city-pairs.
+2. Ingests over **768 daily fare quotations** across the entire advance booking horizon (0–3d, 4–7d, 8–14d, 15–30d, 30+d).
 3. Applies econometric and statistical index formulas (**Jevons Geometric Mean**, **Laspeyres Quantity-Weighted**, **Hedonic Baggage Normalization**, **IQR Outlier Trimming**).
 4. Delivers an interactive **CPI Augmentation & Inflation Nowcasting Simulator** allowing policymakers to recalibrate transport basket weights and forecast headline CPI in real time.
 

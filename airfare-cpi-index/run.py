@@ -9,7 +9,7 @@ import os
 import sys
 import json
 import urllib.parse
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from datetime import datetime
 
 # Add project root to sys.path
@@ -23,6 +23,40 @@ from backend.app.routers.cpi import get_cpi_comparison
 from backend.app.routers.scraper import get_scraper_status, trigger_manual_scrape
 from backend.app.routers.ml import get_fare_prediction, get_30d_forecast, train_model_weights
 from backend.app.routers.copilot import query_mospi_copilot, get_atf_simulation, get_udan_status, get_cartel_hhi
+
+
+class BadRequest(ValueError):
+    pass
+
+
+def parse_int(query, name, default, lo=None, hi=None):
+    raw = query.get(name, [None])[0]
+    if raw is None:
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        raise BadRequest(f"'{name}' must be a whole number")
+    if lo is not None and value < lo:
+        raise BadRequest(f"'{name}' must be at least {lo}")
+    if hi is not None and value > hi:
+        raise BadRequest(f"'{name}' must be at most {hi}")
+    return value
+
+
+def parse_float(query, name, default, lo=None, hi=None):
+    raw = query.get(name, [None])[0]
+    if raw is None:
+        return default
+    try:
+        value = float(raw)
+    except ValueError:
+        raise BadRequest(f"'{name}' must be a number")
+    if lo is not None and value < lo:
+        raise BadRequest(f"'{name}' must be at least {lo}")
+    if hi is not None and value > hi:
+        raise BadRequest(f"'{name}' must be at most {hi}")
+    return value
 
 
 class AirIndexUnifiedRequestHandler(SimpleHTTPRequestHandler):
@@ -59,6 +93,16 @@ class AirIndexUnifiedRequestHandler(SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        import traceback
+        try:
+            return self._do_GET_inner()
+        except BadRequest as e:
+            return self._send_json({"error": str(e)}, 400)
+        except Exception:
+            traceback.print_exc()
+            return self._send_json({"error": "internal server error"}, 500)
+
+    def _do_GET_inner(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
         query = urllib.parse.parse_qs(parsed.query)
@@ -88,7 +132,7 @@ class AirIndexUnifiedRequestHandler(SimpleHTTPRequestHandler):
             })
 
         if path == "/api/index":
-            range_days = int(query.get("range_days", [90])[0])
+            range_days = parse_int(query, "range_days", 90, lo=7, hi=1095)
             route = query.get("route", [None])[0]
             data = get_index_data(range_days=range_days, route=route)
             return self._send_json(data)
@@ -104,10 +148,10 @@ class AirIndexUnifiedRequestHandler(SimpleHTTPRequestHandler):
             return self._send_json(data)
 
         if path == "/api/cpi-comparison":
-            official_cpi = float(query.get("official_cpi", [5.20])[0])
-            transport_weight = float(query.get("transport_weight", [8.59])[0])
-            proposed_weight = float(query.get("proposed_weight", [9.80])[0])
-            airindex_growth = float(query.get("airindex_growth", [12.8])[0])
+            official_cpi = parse_float(query, "official_cpi", 2.75)
+            transport_weight = parse_float(query, "transport_weight", 12.41)
+            proposed_weight = parse_float(query, "proposed_weight", 9.80)
+            airindex_growth = parse_float(query, "airindex_growth", 12.8)
             data = get_cpi_comparison(
                 official_cpi_headline=official_cpi,
                 transport_weight=transport_weight,
@@ -122,13 +166,13 @@ class AirIndexUnifiedRequestHandler(SimpleHTTPRequestHandler):
 
         if path == "/api/scrape-trigger":
             route = query.get("route", ["DEL-BOM"])[0]
-            days_ahead = int(query.get("days_ahead", [7])[0])
+            days_ahead = parse_int(query, "days_ahead", 7, lo=0, hi=90)
             data = trigger_manual_scrape(route=route, days_ahead=days_ahead)
             return self._send_json(data)
 
         if path == "/api/ml/predict-fare":
             route_code = query.get("route_code", ["DEL-BOM"])[0]
-            days = int(query.get("days", [7])[0])
+            days = parse_int(query, "days", 7, lo=0, hi=365)
             carrier = query.get("carrier", ["6E"])[0]
             is_prime = query.get("prime", ["true"])[0].lower() == "true"
             is_wknd = query.get("weekend", ["false"])[0].lower() == "true"
@@ -146,7 +190,7 @@ class AirIndexUnifiedRequestHandler(SimpleHTTPRequestHandler):
             return self._send_json(data)
 
         if path == "/api/ml/forecast-30d":
-            base_idx = float(query.get("base_index", [121.4])[0])
+            base_idx = parse_float(query, "base_index", 121.4, lo=0)
             data = get_30d_forecast(base_index=base_idx)
             return self._send_json(data)
 
@@ -160,7 +204,7 @@ class AirIndexUnifiedRequestHandler(SimpleHTTPRequestHandler):
             return self._send_json(data)
 
         if path == "/api/copilot/atf-simulator":
-            change_pct = float(query.get("change_pct", [10.0])[0])
+            change_pct = parse_float(query, "change_pct", 10.0, lo=-50, hi=100)
             data = get_atf_simulation(atf_change_pct=change_pct)
             return self._send_json(data)
 
@@ -171,9 +215,6 @@ class AirIndexUnifiedRequestHandler(SimpleHTTPRequestHandler):
         if path == "/api/copilot/cartel-hhi":
             data = get_cartel_hhi()
             return self._send_json(data)
-
-        # ---------------- Fallback to Static Frontend Files ----------------
-        return super().do_GET()
 
         # ---------------- Fallback to Static Frontend Files ----------------
         return super().do_GET()
@@ -199,13 +240,13 @@ class AirIndexUnifiedRequestHandler(SimpleHTTPRequestHandler):
 
 
 def run_server(port: int = 8000):
-    HTTPServer.allow_reuse_address = True
+    ThreadingHTTPServer.allow_reuse_address = True
     httpd = None
     target_port = port
     for p in [port, 8001, 8080, 5000, 3000]:
         try:
             server_address = ("0.0.0.0", p)
-            httpd = HTTPServer(server_address, AirIndexUnifiedRequestHandler)
+            httpd = ThreadingHTTPServer(server_address, AirIndexUnifiedRequestHandler)
             target_port = p
             break
         except OSError:

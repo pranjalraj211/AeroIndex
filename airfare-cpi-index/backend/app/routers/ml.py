@@ -55,7 +55,7 @@ def get_30d_forecast(base_index: float = 121.4) -> Dict[str, Any]:
     forecast_series = AirfareMLEngine.generate_30d_forecast(base_index=base_index)
     return {
         "status": "success",
-        "model": "ARIMA(2,1,2) + Log-Hedonic Ridge Nowcaster",
+        "model": "Simulated deterministic trend + seasonal demo forecaster",
         "horizon_days": 30,
         "forecast_series": forecast_series
     }

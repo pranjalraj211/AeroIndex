@@ -14,6 +14,14 @@ class RegulatoryAnomalyEngine:
     festival price gouging, and Aviation Turbine Fuel (ATF) pass-through dynamics.
     """
 
+    MARKET_SHARES_NAMED = {   # everyone we can name individually
+        "IndiGo (6E)": 61.4,
+        "Air India Group (AI)": 26.8,
+        "Akasa Air (QP)": 5.2,
+        "SpiceJet (SG)": 4.1,
+    }
+    MARKET_SHARE_OTHERS = 2.5   # remainder, lumped as "Others"
+
     @staticmethod
     def calculate_hhi(market_shares: List[float]) -> Dict[str, Any]:
         """
@@ -79,10 +87,11 @@ class RegulatoryAnomalyEngine:
     def simulate_atf_fuel_passthrough(
         atf_price_per_kl: float = 98500.0, # Base price INR per kiloliter
         atf_price_change_pct: float = 10.0, # e.g. +10% price revision
-        current_headline_cpi: float = 5.20,
+        current_headline_cpi: float = 2.75,
         airline_fuel_cost_share_pct: float = 42.0, # Jet fuel accounts for 40-45% of airline OPEX
         passthrough_elasticity: float = 0.78,     # 78% of fuel cost rise is passed to airfares
-        passthrough_lag_days: int = 18            # Time lag for airline revenue management systems to adjust
+        passthrough_lag_days: int = 18,            # Time lag for airline revenue management systems to adjust
+        airfare_cpi_weight_pct: float = 0.84      # Airfare's share of the total cpi basket
     ) -> Dict[str, Any]:
         """
         Simulates the econometric pass-through of Aviation Turbine Fuel (ATF) revisions
@@ -93,8 +102,9 @@ class RegulatoryAnomalyEngine:
         airfare_impact_pct = round(airfare_impact_pct, 2)
 
         # Impact on CPI Transport sub-group (~8.59% weight) and proposed airfare weight (~0.84%)
-        cpi_shift_bps = round(airfare_impact_pct * 0.084 * 100, 2)
-        new_headline_cpi = round(current_headline_cpi + (cpi_shift_bps / 100.0), 2)
+        cpi_shift_pp = round(airfare_impact_pct * (airfare_cpi_weight_pct / 100.0), 4)
+        cpi_shift_bps = round(cpi_shift_pp * 100, 2)
+        new_headline_cpi = round(current_headline_cpi + cpi_shift_pp, 2)
 
         return {
             "atf_base_price_kl_inr": atf_price_per_kl,

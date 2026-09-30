@@ -125,7 +125,7 @@ class StatisticalIndexEngine:
     @staticmethod
     def compute_cpi_augmentation(
         official_headline_cpi: float,
-        official_transport_weight: float = 8.59,  # % of CPI basket
+        official_transport_weight: float = 12.41,  # % of CPI basket (2024 series)
         official_airfare_weight_in_transport: float = 1.63, # ~0.14% in overall CPI
         proposed_airfare_weight_in_transport: float = 9.80, # ~0.84% in overall CPI (modern DGCA share)
         official_airfare_index_growth_yoy: float = 4.2,     # Static survey measured growth
@@ -133,7 +133,7 @@ class StatisticalIndexEngine:
     ) -> Dict[str, Any]:
         """
         Simulates the effect of substituting or reweighting the high-frequency AirIndex
-        into the MoSPI Consumer Price Index (CPI-Combined, Base 2012=100).
+        into the MoSPI Consumer Price Index (CPI-Combined, Base 2024=100).
         """
         # Overall weights in total CPI basket
         w_official_airfare_total = (official_transport_weight / 100.0) * (official_airfare_weight_in_transport / 100.0)

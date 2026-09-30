@@ -226,9 +226,9 @@ class AirfareMLEngine:
     @classmethod
     def train_metro_triangle(cls, epochs: int = 200) -> Dict[str, Any]:
         """
-        Executes gradient descent training across the 6 Mega-Metro corridors
-        (Mumbai ⇄ Delhi, Bangalore ⇄ Mumbai, Bangalore ⇄ Delhi).
-        Returns epoch-by-epoch loss reduction, convergence metrics, and route-specific parameters.
+        SIMULATED training curve for the demo: replays a pre-set exponential loss decay,
+        it does not fit real parameters from data. Real training requires the harvested-and-
+        stored fare data described in the "Building the backend" section of the project guide.
         """
         loss_history = []
         initial_loss = 0.442
@@ -243,6 +243,7 @@ class AirfareMLEngine:
 
         return {
             "status": "success",
+            "data_mode": "SIMULATED",
             "corridors_trained": ["DEL-BOM", "BOM-DEL", "BLR-BOM", "BOM-BLR", "BLR-DEL", "DEL-BLR"],
             "total_samples": 218540,
             "epochs": epochs,
@@ -268,10 +269,12 @@ class AirfareMLEngine:
         for d in range(1, 31):
             target_date = today + timedelta(days=d)
             d_str = target_date.strftime("%Y-%m-%d")
-            day_of_week = target_date.weekday()
+            day_of_week = target_date.weekday()   # Monday=0 ... Sunday=6
+
+            is_weekend = day_of_week in [4, 5, 6]  # Fri, Sat, Sun — matches the model's "fri_sun_premium"
 
             drift = 0.06 * d
-            weekend_boost = 1.07 if day_of_week in [4, 6] else 0.97
+            weekend_boost = 1.07 if is_weekend else 0.97
             noise = math.sin(d * 0.9) * 0.7
 
             forecast_index = round((base_index + drift) * weekend_boost + noise, 2)
@@ -282,8 +285,7 @@ class AirfareMLEngine:
                 "forecast_index": forecast_index,
                 "upper_ci": round(forecast_index + uncertainty_spread, 2),
                 "lower_ci": round(forecast_index - uncertainty_spread, 2),
-                "trend": "UPWARD" if drift > 0 else "STABLE",
-                "is_weekend": day_of_week in [4, 5, 6]
-            })
-
+                "trend": "UPWARD" if forecast_index > base_index else "STABLE",
+                "is_weekend": is_weekend
+            }) 
         return forecast
