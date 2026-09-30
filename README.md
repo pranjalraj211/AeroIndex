@@ -1,4 +1,4 @@
-# ✈️ AirIndex: Airfare Price Index for India
+# ✈️ AeroIndex: Airfare Price Index for India
 ### Automated Web Scraping of Airline and OTA Portals for Augmentation of the Consumer Price Index (CPI)
 
 > **Smart India Hackathon (SIH) Problem Statement**  
@@ -11,7 +11,7 @@
 
 India's headline Consumer Price Index (CPI-Combined, Base 2024=100) currently collects domestic airfare quotes manually once a month from a handful of physical airline reservation counters. Over the past decade, Indian domestic civil aviation passenger volume has quadrupled (>150 million annual passengers), rendering the legacy survey methodology prone to **time-lag bias (15–45 days)**, **sampling under-coverage**, and an inability to track **dynamic pricing surges**, **weekend premiums**, and **advance-purchase price escalation**.
 
-This project provides a **production-grade, high-frequency Automated Airfare Price Index (AirIndex)** system that:
+This project provides a **production-grade, high-frequency Automated Airfare Price Index (AeroIndex)** system that:
 1. Automatically crawls **4 direct airlines** (IndiGo, Air India Group, Akasa Air, SpiceJet) and **4 major OTAs** (MakeMyTrip, EaseMyTrip, Cleartrip, Ixigo) across 16 major DGCA city-pairs.
 2. Ingests over **768 daily fare quotations** across the entire advance booking horizon (0–3d, 4–7d, 8–14d, 15–30d, 30+d).
 3. Applies econometric and statistical index formulas (**Jevons Geometric Mean**, **Laspeyres Quantity-Weighted**, **Hedonic Baggage Normalization**, **IQR Outlier Trimming**).
@@ -51,7 +51,7 @@ This project provides a **production-grade, high-frequency Automated Airfare Pri
                                        ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ 5. INTERACTIVE WEB DASHBOARD & POLICY PORTAL                                │
-│   • Real-Time AirIndex Time-Series vs MoSPI Transport Benchmark             │
+│   • Real-Time AeroIndex Time-Series vs MoSPI Transport Benchmark             │
 │   • Geospatial Leaflet Route Map of India with price pressure corridors     │
 │   • Interactive CPI Inflation Nowcasting Slider & RBI Target Band Gauge     │
 │   • Live Scraper Telemetry, Anti-Bot Bypass Metrics & Audit Logs            │
@@ -113,10 +113,10 @@ uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `GET` | `/api/index` | Returns 90-day AirIndex time series, DoD, WoW, MoM, YoY inflation rates, and advance-purchase curve. |
+| `GET` | `/api/index` | Returns 90-day AeroIndex time series, DoD, WoW, MoM, YoY inflation rates, and advance-purchase curve. |
 | `GET` | `/api/routes` | Returns 16 DGCA domestic routes with current fares, distance, weights, and sparklines. |
 | `GET` | `/api/airlines` | Returns carrier market shares (IndiGo, AI, Akasa, SG) and OTA markup spreads. |
-| `GET` | `/api/cpi-comparison` | Simulates the inflation impact of augmenting CPI with AirIndex and returns monthly comparisons. |
+| `GET` | `/api/cpi-comparison` | Simulates the inflation impact of augmenting CPI with AeroIndex and returns monthly comparisons. |
 | `GET` | `/api/scraper-status` | Returns telemetry for all 9 scraping workers, proxy pool sizes, latencies, and audit logs. |
 | `POST` | `/api/scrape-trigger` | Triggers an on-demand multi-portal harvest job and outputs real-time ingested fares with SHA-256 hash. |
 
